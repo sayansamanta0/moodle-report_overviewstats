@@ -519,6 +519,109 @@ class report_overviewstats_chart {
         return $maindata;
     }
 
+    
+    /**
+     * create view chart
+     *
+     * @return array
+     */
+    public static function report_overviewstats_chart_view($course)
+    {
+        $maindata = self::prepare_data_chart_viewed($course);
+        $title = get_string('chart-viewed', 'report_overviewstats');
+        $titleonemonth = get_string('chart-view-month', 'report_overviewstats');
+
+        return [
+            $title => [
+                $titleonemonth => html_writer::tag(
+                    'div',
+                    self::get_chart(
+                        new \core\chart_line(),
+                        get_string('enrolled', 'report_overviewstats'),
+                        $maindata['onemonth']['viewed'],
+                        $maindata['onemonth']['date'],
+                        false
+                    ),
+
+                    [
+                        'id' => 'chart_enrolments_lastmonth',
+                        'class' => 'chartplaceholder',
+                        'style' => 'min-height: 300px;',
+                    ]
+                ),
+            ],
+        ];
+    }
+
+
+    /**
+     * prepare chart view data
+     *
+     * @return array
+     */
+
+    protected static function prepare_data_chart_viewed($course)
+    {
+        global $DB, $CFG;
+
+        if (is_null($course)) {
+            throw new coding_exception(get_string('null-course-exception', 'report_overviewstats'));
+        }
+
+        // Set the current time to today's midnight
+        $now = strtotime("today midnight");
+        $oneday_seconds = 86400; // Number of seconds in a day
+        $onemonth = array_fill(0, 31, []);
+
+        // Fetch all the course viewed log entries for the last 31 days
+        $logmanager = get_log_manager();
+        $readers = $logmanager->get_readers('\core\log\sql_reader');
+        $reader = reset($readers);
+
+        $params = [
+            'component' => 'core',
+            'eventname' => '\core\event\course_viewed',
+            'timestart' => $now - 30 * $oneday_seconds,
+            'courseid' => $course->id,
+        ];
+
+        $select = "component = :component AND eventname = :eventname AND timecreated >= :timestart AND courseid = :courseid";
+
+        $events = $reader->get_events_select($select, $params, 'timecreated DESC', 0, 0);
+
+        file_put_contents($CFG->dirroot.'/report/overviewstats/log',$now ."now time"."\n",FILE_APPEND);
+        foreach ($events as $event) {
+            // Calculate the day difference from today
+            $daydiff = floor(($now - $event->timecreated) / $oneday_seconds);
+    
+            if ($daydiff >= 0 && $daydiff < 30) {
+                // Store unique user IDs per day
+                $onemonth[$daydiff][$event->userid] = true;
+                file_put_contents($CFG->dirroot.'/report/overviewstats/log',$daydiff. "->",FILE_APPEND);
+                file_put_contents($CFG->dirroot.'/report/overviewstats/log',$event->userid. "\n",FILE_APPEND);
+            }
+        }
+
+        // Prepare the data for the chart
+        $maindata = [
+            'onemonth' => [
+                'date' => [],
+                'viewed' => [],
+            ],
+        ];
+
+        $format = get_string('strftimedateshort', 'core_langconfig');
+
+        for ($i = 30; $i >= 0; $i--) {
+            $timestamp = $now - $i * $oneday_seconds;
+            $date = userdate($timestamp, $format);
+            $maindata['onemonth']['date'][] = $date;
+            $maindata['onemonth']['viewed'][] = count($onemonth[$i]);
+        }
+
+        return $maindata;
+    }
+
     /**
      * create chart function based on inputes
      *

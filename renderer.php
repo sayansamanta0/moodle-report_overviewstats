@@ -51,6 +51,7 @@ class report_overviewstats_renderer extends plugin_renderer_base {
             $chartsdata[] = report_overviewstats_chart::report_overviewstats_chart_courses();
         } else {
             $chartsdata[] = report_overviewstats_chart::report_overviewstats_chart_enrolments($course);
+            $chartsdata[] = report_overviewstats_chart::report_overviewstats_chart_view($course);
         }
 
         $outlist = '';

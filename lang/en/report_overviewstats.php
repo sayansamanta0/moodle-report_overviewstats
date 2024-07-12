@@ -52,5 +52,11 @@ $string['enrolled'] = 'Enrolled';
 $string['null-course-exception'] = 'Course level report invoked without the reference to the course!';
 
 $string['chart-accessed'] = "accessed the course per day";
-$string['chart-view-month'] = "chart-view-month";
+$string['chart-view-month'] = "chart view month";
 $string['chart-viewed'] = "Viewed Users in last one month";
+$string['viewed'] = "Viewed";
+
+$string['chart-user-view-time'] = "User View Time";
+$string['chart-user-view-time-month'] = "User View Time In One Month";
+$string['user-view-time'] = "User view time";
+$string['user-view-count'] = "User count";

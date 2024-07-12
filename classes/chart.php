@@ -14,40 +14,46 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
- /**
-  * plugin overviewstats
-  *
-  * @package report_overviewstats
-  * @author DualCube <admin@dualcube.com>
-  * @copyright 2023 DualCube <admin@dualcube.com>
-  * @copyright based on work by 2013 David Mudrak <david@moodle.com>
-  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-  */
+/**
+ * plugin overviewstats
+ *
+ * @package report_overviewstats
+ * @author DualCube <admin@dualcube.com>
+ * @copyright 2023 DualCube <admin@dualcube.com>
+ * @copyright based on work by 2013 David Mudrak <david@moodle.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-  /**
-   * Base class for all charts to be reported
-   *
-   * @package report_overviewstats
-   * @author DualCube <admin@dualcube.com>
-   * @copyright 2023 DualCube <admin@dualcube.com>
-   * @copyright based on work by 2013 David Mudrak <david@moodle.com>
-   * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-   */
-class report_overviewstats_chart {
+/**
+ * Base class for all charts to be reported
+ *
+ * @package report_overviewstats
+ * @author DualCube <admin@dualcube.com>
+ * @copyright 2023 DualCube <admin@dualcube.com>
+ * @copyright based on work by 2013 David Mudrak <david@moodle.com>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+
+class report_overviewstats_chart
+{
     /**
      * create login for login chart
      *
      * @return array
      */
-    public static function report_overviewstats_chart_logins() {
+    public static function report_overviewstats_chart_logins()
+    {
         $maindata = self::prepare_data_login_parday_chart();
         $title = get_string('chart-logins', 'report_overviewstats');
         $titleperday = get_string('chart-logins-perday', 'report_overviewstats');
 
         return [
             $title => [
-                $titleperday => html_writer::tag('div',
-                    self::get_chart(new \core\chart_line(),
+                $titleperday => html_writer::tag(
+                    'div',
+                    self::get_chart(
+                        new \core\chart_line(),
                         get_string('user-numbers', 'report_overviewstats'),
                         $maindata['loggedins'],
                         $maindata['dates'],
@@ -69,7 +75,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    protected static function prepare_data_login_parday_chart() {
+    protected static function prepare_data_login_parday_chart()
+    {
         global $DB, $CFG;
 
         $now = strtotime('today midnight');
@@ -80,10 +87,12 @@ class report_overviewstats_chart {
         $logmanger = get_log_manager();
         $readers = $logmanger->get_readers('\core\log\sql_reader');
         $reader = reset($readers);
-        $params = ['component' => 'core',
+        $params = [
+            'component' => 'core',
             'eventname' => '\core\event\user_loggedin',
             'guestid' => $CFG->siteguest,
-            'timestart' => $now - 30 * DAYSECS, ];
+            'timestart' => $now - 30 * DAYSECS,
+        ];
         $select = "component = :component AND eventname = :eventname AND userid <> :guestid AND timecreated >= :timestart";
         $recordset = $reader->get_events_select($select, $params, 'timecreated DESC', 0, 0);
 
@@ -115,14 +124,20 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    public static function report_overviewstats_chart_countries() {
+    public static function report_overviewstats_chart_countries()
+    {
         $maindata = self::prepare_data_chart_countries();
         $title = get_string('chart-countries', 'report_overviewstats');
         $info = html_writer::div(
-            get_string('chart-countries-info',
-            'report_overviewstats', count($maindata['counts'])),
-            'chartinfo');
-        $chart = html_writer::tag('div',
+            get_string(
+                'chart-countries-info',
+                'report_overviewstats',
+                count($maindata['counts'])
+            ),
+            'chartinfo'
+        );
+        $chart = html_writer::tag(
+            'div',
             self::get_chart(
                 new \core\chart_bar(),
                 get_string('user-numbers', 'report_overviewstats'),
@@ -146,7 +161,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    protected static function prepare_data_chart_countries() {
+    protected static function prepare_data_chart_countries()
+    {
         global $DB;
 
         $sql = "SELECT country, COUNT(*)
@@ -176,12 +192,14 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    public static function report_overviewstats_chart_langs() {
+    public static function report_overviewstats_chart_langs()
+    {
         $maindata = self::prepare_data_chart_langs();
 
         $title = get_string('chart-langs', 'report_overviewstats');
         $info = html_writer::div(get_string('chart-langs-info', 'report_overviewstats', count($maindata['counts'])), 'chartinfo');
-        $chart = html_writer::tag('div',
+        $chart = html_writer::tag(
+            'div',
             self::get_chart(
                 new \core\chart_bar(),
                 get_string('user-numbers', 'report_overviewstats'),
@@ -205,7 +223,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    protected static function prepare_data_chart_langs() {
+    protected static function prepare_data_chart_langs()
+    {
         global $DB;
         $sql = "SELECT lang, COUNT(*)
                   FROM {user}
@@ -235,7 +254,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    public static function report_overviewstats_chart_courses() {
+    public static function report_overviewstats_chart_courses()
+    {
         global $OUTPUT;
 
         $maindata = self::prepare_data_chart_courses();
@@ -257,19 +277,24 @@ class report_overviewstats_chart {
             ]);
         }
 
-        $titlesizes = sprintf('%s %s', get_string('chart-courses-sizes', 'report_overviewstats'),
-            $OUTPUT->help_icon('chart-courses-sizes', 'report_overviewstats'));
+        $titlesizes = sprintf(
+            '%s %s',
+            get_string('chart-courses-sizes', 'report_overviewstats'),
+            $OUTPUT->help_icon('chart-courses-sizes', 'report_overviewstats')
+        );
 
         return [
             $title => [
-                $titlepercategory => html_writer::tag('div',
+                $titlepercategory => html_writer::tag(
+                    'div',
                     html_writer::table($percategorydata),
                     [
                         'id' => 'chart_courses_percategory',
                         'class' => 'simple_data_table',
                     ],
                 ),
-                $titlesizes => html_writer::tag('div',
+                $titlesizes => html_writer::tag(
+                    'div',
                     self::get_chart(
                         new \core\chart_bar(),
                         get_string('course-numbers', 'report_overviewstats'),
@@ -293,7 +318,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    protected static function prepare_data_chart_courses() {
+    protected static function prepare_data_chart_courses()
+    {
         global $DB;
         $maindata = [];
         // Number of courses per category.
@@ -367,7 +393,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    public static function report_overviewstats_chart_enrolments($course) {
+    public static function report_overviewstats_chart_enrolments($course)
+    {
         $maindata = self::prepare_data_chart_enrollments($course);
 
         $title = get_string('chart-enrolments', 'report_overviewstats');
@@ -376,7 +403,8 @@ class report_overviewstats_chart {
 
         return [
             $title => [
-                $titlemonth => html_writer::tag('div',
+                $titlemonth => html_writer::tag(
+                    'div',
                     self::get_chart(
                         new \core\chart_line(),
                         get_string('enrolled', 'report_overviewstats'),
@@ -390,7 +418,8 @@ class report_overviewstats_chart {
                         'style' => 'min-height: 300px;',
                     ]
                 ),
-                $titleyear => html_writer::tag('div',
+                $titleyear => html_writer::tag(
+                    'div',
                     self::get_chart(
                         new \core\chart_line(),
                         get_string('enrolled', 'report_overviewstats'),
@@ -413,7 +442,8 @@ class report_overviewstats_chart {
      *
      * @return array
      */
-    protected static function prepare_data_chart_enrollments($course) {
+    protected static function prepare_data_chart_enrollments($course)
+    {
         global $DB, $CFG;
 
         if (is_null($course)) {
@@ -450,8 +480,8 @@ class report_overviewstats_chart {
         $logmanger = get_log_manager();
         $readers = $logmanger->get_readers('\core\log\sql_reader');
         $reader = reset($readers);
-        $select = "component = :component AND (eventname = :eventname1 OR eventname = :eventname2) ".
-        "AND timecreated >= :timestart AND courseid = :courseid";
+        $select = "component = :component AND (eventname = :eventname1 OR eventname = :eventname2) " .
+            "AND timecreated >= :timestart AND courseid = :courseid";
         $params = [
             'component' => 'core',
             'eventname1' => '\core\event\user_enrolment_created',
@@ -519,12 +549,13 @@ class report_overviewstats_chart {
         return $maindata;
     }
 
-    
-    /**
-     * create view chart
-     *
-     * @return array
-     */
+
+    // /**
+    //  * create view chart
+    //  *
+    //  * @return array
+    //  */
+
     public static function report_overviewstats_chart_view($course)
     {
         $maindata = self::prepare_data_chart_viewed($course);
@@ -537,7 +568,7 @@ class report_overviewstats_chart {
                     'div',
                     self::get_chart(
                         new \core\chart_line(),
-                        get_string('enrolled', 'report_overviewstats'),
+                        get_string('viewed', 'report_overviewstats'),
                         $maindata['onemonth']['viewed'],
                         $maindata['onemonth']['date'],
                         false
@@ -554,20 +585,15 @@ class report_overviewstats_chart {
     }
 
 
-    /**
-     * prepare chart view data
-     *
-     * @return array
-     */
+    // /**
+    //  * prepare chart view data
+    //  *
+    //  * @return array
+    //  */
 
     protected static function prepare_data_chart_viewed($course)
     {
         global $DB, $CFG;
-
-        if (is_null($course)) {
-            throw new coding_exception(get_string('null-course-exception', 'report_overviewstats'));
-        }
-
         // Set the current time to today's midnight
         $now = strtotime("today midnight");
         $oneday_seconds = 86400; // Number of seconds in a day
@@ -589,16 +615,14 @@ class report_overviewstats_chart {
 
         $events = $reader->get_events_select($select, $params, 'timecreated DESC', 0, 0);
 
-        file_put_contents($CFG->dirroot.'/report/overviewstats/log',$now ."now time"."\n",FILE_APPEND);
         foreach ($events as $event) {
             // Calculate the day difference from today
             $daydiff = floor(($now - $event->timecreated) / $oneday_seconds);
-    
+
             if ($daydiff >= 0 && $daydiff < 30) {
                 // Store unique user IDs per day
                 $onemonth[$daydiff][$event->userid] = true;
-                file_put_contents($CFG->dirroot.'/report/overviewstats/log',$daydiff. "->",FILE_APPEND);
-                file_put_contents($CFG->dirroot.'/report/overviewstats/log',$event->userid. "\n",FILE_APPEND);
+
             }
         }
 
@@ -612,7 +636,7 @@ class report_overviewstats_chart {
 
         $format = get_string('strftimedateshort', 'core_langconfig');
 
-        for ($i = 30; $i >= 0; $i--) {
+        for ($i = 30; $i > 0; $i--) {
             $timestamp = $now - $i * $oneday_seconds;
             $date = userdate($timestamp, $format);
             $maindata['onemonth']['date'][] = $date;
@@ -621,6 +645,177 @@ class report_overviewstats_chart {
 
         return $maindata;
     }
+
+    /**
+     * create total  users login time chart
+     *
+     * @return array
+     */
+    public static function report_overviewstats_chart_user_logedin_time()
+    {
+        $userdata = self::prepare_data_user_logedin_time();
+
+        $title = get_string('chart-user-view-time', 'report_overviewstats');
+        $titleonemonth = get_string('chart-user-view-time-month', 'report_overviewstats');
+
+        return [
+            $title => [
+                $titleonemonth => html_writer::tag(
+                    'div',
+                    self::get_chart_user_logedin_time(
+                        get_string('user-view-time', 'report_overviewstats'),
+                        get_string('user-view-count', 'report_overviewstats'),
+                         $userdata['total_time'],
+                         $userdata['user_count'],
+                        $userdata['date'],
+                        false,
+                    ),
+                    [
+                        'id' => 'chart_user_view_time_lastmonth',
+                        'class' => 'chartplaceholder',
+                        'style' => 'min-height: 300px;',
+                    ]
+                ),
+            ],
+        ];
+    }
+
+    /**
+     * prepare user login time data
+     *
+     * @return array
+     */
+    protected static function prepare_data_user_logedin_time()
+{
+    // Set the current time to today's midnight
+    $now = strtotime("today midnight");
+    $oneday_seconds = 86400;
+    $onemonth = array_fill(0, 31, 0);
+    $usercount = array_fill(0, 31, 0); // Array to store user counts
+
+    // Fetch all the user login and logout log entries for the last 31 days
+    $logmanager = get_log_manager();
+    $readers = $logmanager->get_readers('\core\log\sql_reader');
+    $reader = reset($readers);
+
+    $params = [
+        'login_eventname' => '\core\event\user_loggedin',
+        'logout_eventname' => '\core\event\user_loggedout',
+        'timestart' => $now - (31 * $oneday_seconds),
+    ];
+
+    $select = "(eventname = :login_eventname OR eventname = :logout_eventname) AND timecreated >= :timestart";
+    $events = $reader->get_events_select($select, $params, 'timecreated ASC', 0, 0);
+
+    // Debugging output
+    // file_put_contents($CFG->dirroot . '/report/overviewstats/log', "Fetched events count: " . count($events) . "\n", FILE_APPEND);
+
+    $user_sessions = [];
+
+    foreach ($events as $event) {
+        $userid = $event->userid;
+        $eventname = $event->eventname;
+        $timecreated = $event->timecreated;
+
+        if (!isset($user_sessions[$userid])) {
+            $user_sessions[$userid] = [];
+        }
+
+        if ($eventname == '\core\event\user_loggedin') {
+            $user_sessions[$userid][] = [
+                'login' => $timecreated,
+                'logout' => null,
+            ];
+        } elseif ($eventname == '\core\event\user_loggedout') {
+            // Find the first unmatched login event
+            foreach ($user_sessions[$userid] as &$session) {
+                if ($session['logout'] === null) {
+                    $session['logout'] = $timecreated;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Debugging output
+    // file_put_contents($CFG->dirroot . '/report/overviewstats/log', json_encode($user_sessions) . "\n", FILE_APPEND);
+
+    // Calculate the total login session time per day and user count
+    foreach ($user_sessions as $userid => $sessions) {
+        $unique_days = []; // Track unique days for each user
+
+        foreach ($sessions as $index => $session) {
+            if (isset($session['login'])) {
+                if (isset($session['logout'])) {
+                    // Calculate the day difference from the period start (not from now)
+                    $daydiff = floor(($session['login'] - ($now - 31 * $oneday_seconds)) / $oneday_seconds);
+
+                    if ($daydiff >= 0 && $daydiff < 31) {
+                        $session_time = $session['logout'] - $session['login'];
+                        $onemonth[$daydiff] += $session_time;
+                        $unique_days[$daydiff] = true; // Mark this day as having a login for this user
+                    }
+                } else {
+                    // If logout is not set, find the next login time or use the end of the day (midnight)
+                    if (isset($sessions[$index + 1]) && isset($sessions[$index + 1]['login'])) {
+                        $next_login_time = $sessions[$index + 1]['login'];
+                    } else {
+                        // End of the day (midnight)
+                        $next_login_time = strtotime('tomorrow midnight', $session['login']) - 1;
+                    }
+
+                    // Calculate the day difference from the period start (not from now)
+                    $daydiff = floor(($session['login'] - ($now - 31 * $oneday_seconds)) / $oneday_seconds);
+
+                    if ($daydiff >= 0 && $daydiff < 31) {
+                        $session_time = $next_login_time - $session['login'];
+                        $onemonth[$daydiff] += $session_time;
+                        $unique_days[$daydiff] = true; // Mark this day as having a login for this user
+                    }
+                }
+            }
+        }
+
+        // Increment user count for each unique day
+        foreach ($unique_days as $day => $value) {
+            $usercount[$day]++;
+        }
+    }
+
+    $onemonth = array_reverse($onemonth);
+    $usercount = array_reverse($usercount);
+
+    // Debugging output
+    // file_put_contents($CFG->dirroot . '/report/overviewstats/log', json_encode($usercount) . "\n", FILE_APPEND);
+
+    // Prepare the data for the chart
+    $userdata = [
+        'date' => [],
+        'total_time' => [],
+        'user_count' => [],
+    ];
+
+    $format = get_string('strftimedateshort', 'core_langconfig');
+
+    for ($i = 30; $i > 0; $i--) {
+        $timestamp = $now - $i * $oneday_seconds;
+        $date = userdate($timestamp, $format);
+        $userdata['date'][] = $date;
+
+        // $total_time_hours = isset($onemonth[$i]) ? round(($onemonth[$i] / 3600)/$user_count, 2) : 0; // Convert seconds to hours
+        $total_time_hours = isset($onemonth[$i]) ? round(($onemonth[$i] / 3600) / ($user_count ?: 1), 2) : 0; // Convert seconds to hours
+
+        $userdata['total_time'][] = $total_time_hours;
+
+        $user_count = isset($usercount[$i]) ? $usercount[$i] : 0;
+        $userdata['user_count'][] = $user_count;
+    }
+
+    return $userdata;
+}
+
+
+
 
     /**
      * create chart function based on inputes
@@ -632,7 +827,8 @@ class report_overviewstats_chart {
      * @param bool $ishorizontal
      * @return chart
      */
-    protected static function get_chart($chart, $seriesname, $seriesdata, $labelsdata, $ishorizontal) {
+    protected static function get_chart($chart, $seriesname, $seriesdata, $labelsdata, $ishorizontal)
+    {
         global $OUTPUT;
         $series = new \core\chart_series($seriesname, $seriesdata);
         $labels = $labelsdata;
@@ -640,7 +836,30 @@ class report_overviewstats_chart {
             $chart->set_horizontal(true);
         }
         $chart->add_series($series);
+        // $chart->add_series($series);
         $chart->set_labels($labels);
         return $OUTPUT->render($chart);
     }
+
+    protected static function get_chart_user_logedin_time($seriesname_time,$seriesname_count, $seriesdata_time,$seriesdata_count, $labelsdata, $ishorizontal)
+    {
+        global $OUTPUT;
+
+        $chart = new \core\chart_bar(); 
+        $labels = $labelsdata;
+        $series_time = new \core\chart_series($seriesname_time, $seriesdata_time);
+        $series_count = new \core\chart_series($seriesname_count, $seriesdata_count);
+        $series_count->set_type(\core\chart_series::TYPE_LINE); // Set the series type to line chart.
+        if ($ishorizontal) {
+            $chart->set_horizontal(true);
+        }
+        $chart->add_series($series_time);
+        $chart->add_series($series_count);
+        $chart->set_labels($labels);
+
+        return $OUTPUT->render($chart);
+    }
+
+
+
 }
